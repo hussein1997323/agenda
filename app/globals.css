@@ -1,0 +1,3 @@
+@import "tailwindcss";
+:root { --ink:#17231d; --muted:#68756d; --paper:#fffefa; --green:#1e8a57; --dark:#115d39; --soft:#e2f3e9; --line:#dce2dc; --font-body:"Segoe UI",Arial,sans-serif; --font-display:"Aptos Display","Segoe UI",Arial,sans-serif; }
+*{box-sizing:border-box} html{background:#f3f1ea} body{margin:0;min-height:100vh;color:var(--ink);background:radial-gradient(circle at 8% 4%,rgba(30,138,87,.13),transparent 28rem),linear-gradient(135deg,#f8f6f0,#efeee7);font-family:var(--font-body),sans-serif}button,input,select{font:inherit}button{cursor:pointer}::selection{color:#fff;background:var(--green)}
