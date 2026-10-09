@@ -1,14 +1,24 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import BusinessDatePicker from "./business-date-picker";
 import DockClock from "./dock-clock";
 
 type Slot = { horario_inicio: string; horario_saida: string };
 type Result = { pedido: string; quantidade: number; possibilidades: Slot[] };
 
 const pad = (value: number) => String(value).padStart(2, "0");
-const today = () => {
+const isWeekend = (value: string) => {
+  if (!value) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day, 12);
+  return date.getDay() === 0 || date.getDay() === 6;
+};
+const nextBusinessDay = () => {
   const date = new Date();
+  while (date.getDay() === 0 || date.getDay() === 6) {
+    date.setDate(date.getDate() + 1);
+  }
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 };
 const time = (iso: string) => iso.slice(11, 16);
@@ -40,7 +50,7 @@ export default function SchedulePage() {
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
-      const currentDate = today();
+      const currentDate = nextBusinessDay();
       setNow(new Date());
       setData(currentDate);
       setMinimumDate(currentDate);
@@ -77,6 +87,21 @@ export default function SchedulePage() {
   async function search(event: FormEvent) {
     event.preventDefault();
     await loadAvailability(data);
+  }
+
+  function selectDate(selectedDate: string) {
+    setResult(null);
+    setSlot(null);
+    if (isWeekend(selectedDate)) {
+      setData("");
+      setMessage(
+        "As retiradas estão disponíveis somente de segunda a sexta-feira.",
+      );
+      return;
+    }
+    setData(selectedDate);
+    setMessage("");
+    void loadAvailability(selectedDate);
   }
 
   async function book(event: FormEvent) {
@@ -183,19 +208,12 @@ export default function SchedulePage() {
                 required
               />
             </label>
-            <label className={labelClass}>
+            <label className={`${labelClass} mb-24`}>
               Data da retirada
-              <input
-                className={inputClass}
-                type="date"
-              min={minimumDate}
+              <BusinessDatePicker
                 value={data}
-                onChange={(e) => {
-                  const selectedDate = e.target.value;
-                  setData(selectedDate);
-                  void loadAvailability(selectedDate);
-                }}
-                required
+                minimumDate={minimumDate}
+                onChange={selectDate}
               />
             </label>
             <button className={primaryButton} disabled={loading}>
